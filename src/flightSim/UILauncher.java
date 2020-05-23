@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+
 public class UILauncher extends Application {
 
 
@@ -29,26 +30,45 @@ public class UILauncher extends Application {
         eventCol.prefWidthProperty().bind(outputTable.widthProperty().subtract(2));
         eventCol.setResizable(false);
         eventCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
-        outputTable.setItems(outputList);
         outputTable.getColumns().addAll(eventCol);
         Label label = new Label("Please check your scenario.txt file for potential errors before running the simulator.");
         Button button = new Button("Generate simulation");
 
         button.setOnAction(action -> {
-            Simulator.main(new String[]{"input/scenario.txt"});
             Scanner in = null;
-            String s;
-            try {
-                in = new Scanner(new File("simulation.txt"));
+            boolean runSwitch = true;
+            try{
+                in = new Scanner(new File("input/scenario.txt"));
+
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                runSwitch = false;
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error!");
+                alert.setHeaderText("Scenario Error");
+                alert.setContentText("Scenario not found!");
+                alert.showAndWait();
             }
-            while(in.hasNextLine()) {
-                s = in.nextLine();
-                outputList.add(s);
+
+            if(runSwitch) {
+                outputTable.getItems().clear();
+                Simulator.main(new String[]{"input/scenario.txt"});
+                String s;
+                try {
+                    in = new Scanner(new File("simulation.txt"));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                while (in.hasNextLine()) {
+                    s = in.nextLine();
+                    outputList.add(s);
+                }
+                in.close();
+                outputTable.setItems(outputList);
+                button.setDisable(true);
+                label.setText("Simulation has been generated!");
             }
-            in.close();
         });
+
 
         VBox vbox = new VBox(label,button,outputTable);
         StackPane layout = new StackPane();
