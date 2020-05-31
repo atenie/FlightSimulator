@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="generator" content="Asciidoctor 0.1.4">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css">
+        <title>FlightSimulator Dokumentation</title>
+        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css">
+    </head>
+    <body class="book toc2 toc-left">
+        <div id="header">
+            <h1 style="font-size: 60px;"><span class="image"><img src="images/arc42-logo.png" alt="arc42" width="120"></span> Dokumentation - FlightSimulator</h1>
+            <div id="toc" class="toc2">
+                <div id="toctitle">Inhaltsverzeichnis</div>
+                <ul class="sectlevel1">
+                    <li><a href="#section-introduction-and-goals">1. Einführung und Ziele</a></li>
+                    <li>
+                        <ul class="sectlevel2">
+                            <li><a href="#_aufgabenstellung">1.1. Aufgabenstellung</a></li>
+                            <li><a href="#_qualit_tsziele">1.2. Qualitätsziele</a></li>
+                            <li><a href="#_stakeholder">1.3. Stakeholder</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#section-architecture-constraints">2. Randbedingungen</a></li>
+                    <li>
+                        <ul class="sectlevel2">
+                            <li><a href="#_technische">2.1. Technische</a></li>
+                            <li><a href="#_organisatorische">2.2. Organisatorische</a></li>
+                            <li><a href="#_konventionen">2.3. Konventionen</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a href="#section-system-scope-and-context">3. Kontextabgrenzung</a></li>
+                    <li>
+                        <ul class="sectlevel2">
+                            <li><a href="#_fachlicher_kontext">3.1. Fachlicher Kontext</a></li>
+                            <li><a href="#_technischer_kontext">3.2. Technischer Kontext</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#section-solution-strategy">4. Lösungsstrategie</a></li>
+
+
+                    <li><a href="#section-building-block-view">5. Bausteinsicht</a></li>
+                    <li>
+                        <ul class="sectlevel2">
+                            <li><a href="#_whitebox_gesamtsystem">5.1. Ebene 1</a></li>
+                            <li><a href="#_blackbox">5.2. Subsystem Simulator</a></li>
+                            <li><a href="#_subsystem">5.3. Subsystem AircraftFactory</a></li>
+                            <li><a href="#_subsystem_bb">5.4. Subsystem Tower</a></li>
+                            <li><a href="#_whitebox">5.5. Whitebox </a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#section-runtime-view">6. Laufzeitsicht</a></li>
+                    <li>
+                        <ul class="sectlevel2">
+                            <li><a href="#__em_bezeichnung_laufzeitszenario_1_em">6.1. Zugermittlung</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#section-deployment-view">7. Verteilungssicht</a></li>
+                    <li><a href="#section-concepts">8. Querschnittliche Konzepte</a></li>
+                    <li>
+                        <ul class="sectlevel2">
+                            <li><a href="#__em_konzept_1_em">8.1. Abhängigkeiten</a></li>
+                            <li><a href="#__em_konzept_2_em">8.2. Domänenmodell</a></li>
+                            <li><a href="#__em_konzept_3_em">8.3. Benutzungsoberfläche</a></li>
+                            <li><a href="#__em_konzept_4_em">8.4. Validierung</a></li>
+                            <li><a href="#__em_konzept_5_em">8.5. Fehlerbehandlung</a></li>
+                            <li><a href="#__em_konzept_6_em">8.6. Testbarkeit</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#section-design-decisions">9. Entwurfsentscheidungen</a></li>
+                    <li><a href="#section-quality-scenarios">10. Qualitätsanforderungen</a></li>
+                    <li>
+                        <ul class="sectlevel2">
+                            <li><a href="#_qualit_tsbaum">10.1. Qualitätsbaum</a></li>
+                            <li><a href="#_qualit_tsszenarien">10.2. Qualitätsszenarien</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#section-technical-risks">11. Risiken und technische Schulden</a></li>
+                    <li><a href="#section-glossary">12. Glossar</a></li>
+                </ul>
+            </div>
+        </div>
+        <div id="content">
+            <div id="preamble">
+                <div class="sectionbody">
+                    <div style="page-break-after: always;"></div>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-introduction-and-goals"><a class="anchor" href="#section-introduction-and-goals"></a>1. Einführung und Ziele</h2>
+                <div class="sectionbody">
+                    <div class="sect2">
+                        <h3 id="_aufgabenstellung"><a class="anchor" href="#_aufgabenstellung"></a>1.1. Aufgabenstellung</h3>
+                        <p>Der Frankfurter Flughafen hat kürzlich festgestellt, dass er aufgrund häufiger Wetteränderungen auf einigen Landebahnen einen Engpass aufweist. Um eine Lösung zu finden, müssen sie zunächst wissen, welche Szenarien die schlimmsten Engpässe verursachen. Deshalb haben sie sich für einen Simulator entschieden, in dem sie mehrere Szenarien konfigurieren und analysieren, und hoffen, dass sie dadurch hervorgehoben werden, wo das eigentliche Problem liegt.</p>
+                        <h6>Was ist FlightSimulator eigentlich?</h6>
+                        <ul>
+                            <li>FlightSimulator ist ein Software, die eine Lösung für das oben genannte Problem ist.</li>
+                            <li>Es dient sowohl als leicht zugängliche, als auch als attraktive Fallstudie zum Entwurf, zur Bewertung und Dokumentation von Softwarearchitekturen.</li>
+                            <li>Die Software wurde entwickelt, um erweiterbar zu sein, und ihre verständliche Struktur lädt Entwickler zum Experimentieren und Erweitern des Softwares ein.</li>
+                            <li>Die Komplexität des Codes ist nicht sehr hoch, weil es nur ein Prototyp ist.</li>
+                        </ul>
+                        <h6>Wichtige Eigenschaften</h6>
+                        <ul>
+                            <li>Aus Sicht der späteren Nutzung ist es wichtig um ein erweitbares Program zu entwickeln. Dafür sind sowohl Abstrakte Klassen als auch ein Factory benutzt. Das Ziel ist das Program so zu modellieren, um Firmas mit dem vorhandenen Code ein einfaches UI/View programmieren können und damit sie das System auch verwenden können.</li>
+                        </ul>
+                    </div>
+                    <div class="sect2">
+                        <h3 id="_qualit_tsziele"><a class="anchor" href="#_qualit_tsziele"></a>1.2. Qualitätsziele</h3>
+                        <p>Wir haben begonnen, an dem Konzept zu arbeiten, und nachdem wir alle Schichten der Software analysiert hatten, haben wir einige Designentscheidungen getroffen:</p>
+                        <table class="tableblock frame-all grid-all" style="width:100%; ">
+                            <colgroup>
+                                <col style="width:25%;">
+                                <col style="width:75%;"> 
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="tableblock halign-left valign-top">Qualitätsziel</th>
+                                    <th class="tableblock halign-left valign-top">Motivation / Beschreibung</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Gerätekompatibilität</td>
+                                    <td>Da die Software auf einer Vielzahl von Betriebssystemen in einer sehr strengen Unternehmensumgebung ausgeführt werden soll, entschiedeten wir uns für die Verwendung einer klassischen OOP-Sprache: Java.</td>
+                                </tr>
+                                <tr>
+                                    <td>Erweitbarkeit</td>
+                                    <td>Die mit Java benutzte Abstraktion zielt darauf ab, die Details der Implementierung nicht zu berücksichtigen und daraus ein allgemeines Schema zur Lösung des Problems abzuleiten. So haben wir uns entschieden um ein Factory zu erstellen, damit wir mehrere Typen von Luftfahrzeuge erstellen können. Wieso ist es wichtig? Man kann das Factory verwendend das Program leicht weiterentwickeln und mehrere Funktionalitäten hinzufügen.</td>
+                                </tr>
+                                <tr>
+                                    <td>Logische und klare Modellierung</td>
+                                    <td>Da FlightSimulator nur ein Prototyp für Unternehmen ist, um ein Simulator anhand ihren Präferenzen zu implementieren, ist es wichtig die Software so gut und lesbar zu modellieren wie möglich.</td>
+                                </tr>
+                                <tr>
+                                    <td>Frontend-Kompatibilität</td>
+                                    <td>Das Program ist kompatibel mit einer anpassbaren Benutzeroberfläche. Die JavaFx Benutzeroberfläche wurde nur für Demozwecke erstellt, aber man kann aus mehrere UI Varianten wählen.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sect2">
+                        <h3 id="_stakeholder"><a class="anchor" href="#_stakeholder"></a>1.3. Stakeholder</h3>
+                        <table class="tableblock frame-all grid-all" style="width:100%; ">
+                            <colgroup>
+                                <col style="width:20%;">
+                                <col style="width:20%;">
+                                <col style="width:60%;"> 
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="tableblock halign-left valign-top">Rolle</th>
+                                    <th class="tableblock halign-left valign-top">Kontakt</th>
+                                    <th class="tableblock halign-left valign-top">Erwartungshaltung</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="tableblock halign-left valign-top"><p class="tableblock">Flughafen Frankfurt am Main</p></td>
+                                    <td class="tableblock halign-left valign-top"><p class="tableblock">+ 49 180 6372 4636</p></td>
+                                    <td class="tableblock halign-left valign-top">
+                                        <ul>
+                                            <li>Sie sind der größte deutsche Verkehrsflughafen.</li>
+                                            <li>Sie brauchen ein Software, damit sie Flüge simulieren können.</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tableblock halign-left valign-top"><p class="tableblock">Academia Forţelor Aeriene Henri Coandă (Universität Rumänien)</p></td>
+                                    <td class="tableblock halign-left valign-top"><p class="tableblock">0268 423 421</p></td>
+                                    <td class="tableblock halign-left valign-top">
+                                        <ul>
+                                            <li>Sie machen eine Studie über die Flugzeugschwierigkeiten bei schlechten Wetterbedingungen.</li>
+                                            <li>Sie brauchen ein Software, die eine relative einfache und visuelle Benutzeroberfläche hat um Statistiken aus der Ergebnisse zu erstellen.</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tableblock halign-left valign-top"><p class="tableblock">Studenten & Lehrer</p></td>
+                                    <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                                    <td class="tableblock halign-left valign-top">
+                                        <ul>
+                                            <li>Die allgemeine Modellierung des Programs, das benutzte Factory und die abstrakte Klassen sind sehr gut, um den Grundlage für die Verwendung solcher abstrakten Modelle zu verstehen.</li>
+                                            <li>Ein Lehrer kann diese Program für Stundenten als Beispiel geben oder am Ende einer Java Kurse, kann das auch ein Prüfungproblem sein.</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div style="page-break-after: always;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-architecture-constraints"><a class="anchor" href="#section-architecture-constraints"></a>2. Randbedingungen</h2>
+                <div class="sectionbody">
+                    <h3 id="_technische"><a class="anchor" href="#_technische"></a>2.1. Technische</h3>
+                    <table class="tableblock frame-all grid-all" style="width:100%; ">
+                        <colgroup>
+                            <col style="width:25%;">
+                            <col style="width:75%;"> 
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="tableblock halign-left valign-top">Randbedingung</th>
+                                <th class="tableblock halign-left valign-top">Motivation / Beschreibung</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Moderate Hardwareausstattung</td>
+                                <td>Um FlightSimulator zu benutzen braucht man entweder ein PC oder Laptop. Aber wenn man ein entsprechendes UI dafür baut, dann kann man das Program auch auf ein Handy benutzen. </td>
+                            </tr>
+                            <tr>
+                                <td>Betriebssysteme</td>
+                                <td>Java ist platformunabhängig. Man kann das Program auf jedes Betriebsystem ausführen.</td>
+                            </tr>
+                            <tr>
+                                <td>Implementierung in Java</td>
+                                <td>Das Program ist in Java 7 entwickelt, aber es sollte auch auf neue Java Versionen funtionieren.</td>
+                            </tr>
+                            <tr>
+                                <td>Implementierung mit Fremdsoftware</td>
+                                <td>Wenn es sich um ein Third-Party Software geht (z. B. ein grafisches Frontend), kann man FlightSimulator ohne Probleme benutzen und als System implementieren.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3 id="_organisatorische"><a class="anchor" href="#_organisatorische"></a>2.2. Organisatorische</h3>
+
+                    <table class="tableblock frame-all grid-all" style="width:100%; ">
+                        <colgroup>
+                            <col style="width:25%;">
+                            <col style="width:75%;"> 
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="tableblock halign-left valign-top">Randbedingung</th>
+                                <th class="tableblock halign-left valign-top">Beschreibung</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Team</td>
+                                <td>Lorand Istenes, Teodor Filipescu, Alexandru Tenie, Dorin Iliescu und Otto Fischer</td>
+                            </tr>
+                            <tr>
+                                <td>Zeitplan</td>
+                                <td>Entwicklung des Codes bis 18.-ten Mai. Dokumentierung des Projektes ab 19.-ten Mai bis 24.-sten Mai. </td>
+                            </tr>
+                            <tr>
+                                <td>Entwicklungswerkzeuge</td>
+                                <td>Die Quellcode wurde in IntelliJ geschrieben mit Hilfe von JavaFX und andere moderne Technologien.</td>
+                            </tr>
+                            <tr>
+                                <td>Konfigurations- und Versionsverwaltung</td>
+                                <td>Die Quelltexte der Lösung ist Open Source und die erste Version ist auf <a href="https://github.com/atenie/FlightSimulator" target="_blank">Github</a> zu finden.</td>
+                            </tr>
+                            <tr>
+                                <td>Testwerkzeuge und -prozesse</td>
+                                <td>Die Teste waren in JUnit 4 gebildet und erfolgreich ausgeführt.</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+
+                    <h3 id="_konventionen"><a class="anchor" href="#_konventionen"></a>2.3. Konventionen</h3>
+
+                    <table class="tableblock frame-all grid-all" style="width:100%; ">
+                        <colgroup>
+                            <col style="width:25%;">
+                            <col style="width:75%;"> 
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="tableblock halign-left valign-top">Randbedingung</th>
+                                <th class="tableblock halign-left valign-top">Beschreibung</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Architekturdokumentation</td>
+                                <td>Terminologie und Gliederung nach dem deutschen arc42-Template in HTML</td>
+                            </tr>
+                            <tr>
+                                <td>Sprache (Deutsch</td>
+                                <td>Die Dokumentation wurde auf Deutsch geschrieben aber die Quelltexte sind auf English. Das heißt, dass die Klassen und Variabel-name auf English sind. Aufgrund der englischen Sprache, kann man das System so überall der Welt implementieren.</td>
+                            <tr>
+                                <td>Kodierrichtlinien für Java</td>
+                                <td>Geprüft mit IntelliJ plugins und manuelles Testen.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="page-break-after: always;"></div>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-system-scope-and-context"><a class="anchor" href="#section-system-scope-and-context"></a>3. Kontextabgrenzung</h2>
+                <div class="sectionbody">
+                    <div class="sect2">
+                        <h3 id="_fachlicher_kontext"><a class="anchor" href="#_fachlicher_kontext"></a>3.1. Fachlicher Kontext</h3>
+                        <img src="images/business-context.png" style="width: 100%;" alt="">
+                        <h4>Actor</h4>
+                        <p>Um das FlightSimulator zu starten braucht man ein Benutzer (Actor). Dieser soll das User Interface benutzen um eine Simulation durchzuführen. Er macht eine Anfrage (Request) mit einer Taste zu unserem System. Wenn diese Anfrage gemacht wurde, macht das System eine andere Anfrage zu unsere Datenbank (screnario.txt). Die Datenbank gibt die verfügbare Luftfahrzeuge zurück. Das System macht dann die Simulation und liefert die Ergebnisse zurück zu den Benutzer.</p>
+                        <h4>User Interface (Fremdsystem)</h4>
+                        <p>Das User Interface ist die Verbindung zwischen dem Benutzer und System. Hier kann man die Simulationen starten und die Ergebnisse anschauen und analysieren. Das Projekt hat schon eine erstellte JavaFX UI (für Demo Zwecke nur), aber man kann das System mit anderen UIs auch implementieren. </p>
+                        <h4>FlightSimulator System</h4>
+                        <p>Hier werden die Luftfahrzeugobjekte erstellt und ihre Verhalten simuliert. Jeder Luftfahrzeugetyp hat ein unterschiedliches Verhalten in schlechte Wetterbedingungen und die Ergebnisse werden anhand dieses Verhalten generiert.</p>
+                        <h4>Datenbank (Fremdsystem)</h4>
+                        <p>Die Datenbank ist für die Speicherung der verfügbaren Flugzeuge verantwortlich. Unser Datenbank ist momentan nur ein Textdatei, aber man kann das Program leicht mit Mysql oder SQL Server auch verbinden.</p>
+                    </div>
+                    <div class="sect2">
+                        <h3 id="_technischer_kontext"><a class="anchor" href="#_technischer_kontext"></a>3.2. Technischer Kontext</h3>
+                        <img src="images/technical-context.png" style="width: 100%;" alt="">
+                        <h4>UI</h4>
+                        <p>Die “Anbindung” des Benutzers erfolgt über ein grafisches Frontend. In unserem Fall, haben wir ein JavaFX Frontend, aber das Program kann immer mit einem anderen UI verbindet werden.</p>
+                        <h4>Datenbank</h4>
+                        <p>Die Datenbank ist ein TextDatei und der Zugriff erfolgt ausschließlich lesend.</p>
+                        <div style="page-break-after: always;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-solution-strategy"><a class="anchor" href="#section-solution-strategy"></a>4. Lösungsstrategie</h2>
+                <div class="sectionbody">
+                    <h4>4.1 Einleitung</h4>
+                    <p>In der folgenden Tabelle werden die Qualitätsziele von FlightSimulator (→ Abschnitt 1.2) mit passenden Architekturansätzen verglichen und somit ein einfacher Zugriff auf die Lösung bereitgestellt werden.</p>
+                    <img src="images/4-1.png" style="width:100%;" alt="">
+
+                    <table class="tableblock frame-all grid-all" style="width:100%; ">
+                        <colgroup>
+                            <col style="width:25%;">
+                            <col style="width:75%;"> 
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="tableblock halign-left valign-top">Qualitätsziel</th>
+                                <th class="tableblock halign-left valign-top">Dem zuträgliche Ansätze in der Architektur</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Gerätekompatibilität</td>
+                                <td>Die Anwendung verwendet JVM (E), das auf verschiedenen Betriebssystemen installiert werden kann. Z.B. Windows,Linux,Mac OS X (macOS), Andorid,IoT devices,Web etc.</td>
+                            </tr>
+                            <tr>
+                                <td>Erweitbarkeit</td>
+                                <td>Die Anwendung verwendet zwei Design Patterns(B),(C), um sich der Erweiterbarkeit zu nähern: Factory- und Observer-Pattern</td>
+                            <tr>
+                                <td>Loghische und klare Modellierung</td>
+                                <td>Die Modellierung der Anwendung wurde unter Berücksichtigung der " loose coupling " durchgeführt. Die App behält die SOLID-Prinzipien der OOP-Programmierung bei.</td>
+                            </tr>
+                            <tr>
+                                <td>Frontend-Kompatibilität</td>
+                                <td>Für die Demo verwendet die App das JFX-Framework für die Interaktion mit dem Benutzer (D) und als I/O 2 -Dateien (F).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <h4>4.2 Struktur von Flight Simulator</h4>
+                    <p>FlightSimulator ist ein Java-Programm mit Observer Pattern und Facotry Pattern implementiert. Es ist in folgende Teile unterteilt:</p>
+                    <ul>
+                        <li>Eine AircraftFactory-Klasse, die jedes Objekt erstellt</li>
+                        <li>Eine WeatherTower-Klasse, die jedes Objekt mit Wetterdaten informiert</li>
+                        <li>Die Verbindung zu einer grafischen Benutzeroberfläche über das Java-FX Framework</li>
+                        <li>Speichern der Verlauf im „.txt“ Format</li>
+                    </ul>
+                    <p>Diese Zerlegung ermöglicht es Ihnen, Dinge wie das Wetterprotokoll oder der  Flugtyp bei Bedarf zu ersetzen. Alle Teile werden über Schnittstellen abstrahiert. Ihre Implementierungen werden über „Dependency Injection“ zusammengestellt (→ 5. Bausteinansicht, → 8.1 Abhängigkeiten zwischen Modulen). Durch die Zerlegung kann die Software automatisch getestet werden. (→ 8.7 Testbarkeit).</p>
+                    <h4>4.3 FightSimulator Strategie</h4>
+                    <center>-Flugzeuge-</center> <br>
+                    <table class="tableblock frame-all grid-all" style="width:100%; ">
+                        <colgroup>
+                            <col style="width:33%;">
+                            <col style="width:33%;"> 
+                            <col style="width:33%;"> 
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="tableblock halign-left valign-top">JetPlane</th>
+                                <th class="tableblock halign-left valign-top">Helicopter</th>
+                                <th class="tableblock halign-left valign-top">Baloon</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SONNE - Der Breitengrad nimmt mit 10 zu, die Höhe mit 2</td>
+                                <td>SONNE - Die Längengrad nimmt mit 10 zu, die Höhe mit 2</td>
+                                <td>SONNE - Die Längengrad nimmt mit 2 zu, die Höhe mit 4</td>
+                            </tr>
+                            <tr>
+                                <td>REGEN - Der Breitengrad nimmt mit 5 zu</td>
+                                <td>REGEN - Die Längengradnimmt mit 5 zu</td>
+                                <td>REGEN - Die Höhe nimmt mit 5 ab</td>
+                            </tr>
+                            <tr>
+                                <td>NEBEL - Der Breitengrad nimmt mit 1 zu</td>
+                                <td>NEBEL - Die Längengrad nimmt mit 1 zu</td>
+                                <td>NEBEL - Die Höhe nimmt mit 3 ab</td>
+                            </tr>
+                            <tr>
+                                <td>SCHNEE - Die Höhe nimmt mit 7 ab</td>
+                                <td>SCHNEE - Die Höhe nimmt mit 12 ab</td>
+                                <td>SCHNEE - Die Höhe nimmt mit 15 ab</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                    <ul>
+                        <li>Koordinaten sind positive Zahlen.</li>
+                        <li>Die Höhe liegt im Bereich von 0 bis 100.</li>
+                        <li>Wenn ein Flugzeug die obere Grenzhöhe überschreiten muss, bleibt es bei 100.</li>
+                        <li>Jedes Mal, wenn ein Flugzeug erstellt wird, erhält es eine eindeutige ID. Es können nicht 2 Flugzeuge mit derselben ID vorhanden sein.</li>
+                        <li>Wenn ein Flugzeug die Höhe 0 erreicht oder darunter gehen muss, landet das Flugzeug, hebt die Registrierung vom Wetterturm ab und protokolliert seine aktuellen Koordinaten.</li>
+                        <li>Wenn sich das Wetter ändert, muss jeder Flugzeugtyp eine Nachricht protokollieren.
+                        </li>
+                        <li>Jedes Mal, wenn sich ein Flugzeug zum / vom Wetterturm registriert oder abmeldet, wird eine Nachricht protokolliert.
+                        </li>
+                    </ul>
+
+                    <h4>4.4 Eingabe- und Ausgabedaten</h4>
+                    <p>FlightSimulator verwendet eine grafische Benutzeroberfläche, die Daten aus einer ".txt" -Datei mit dem Namen "Scenario.txt" abruft.</p>
+                    <img src="images/4-2.png" style="width: 100%;" alt="">
+                    <p style="margin:20px 0px;">Die Ausgabe wird in einer lokalen ".txt" -Datei mit dem Namen "simulations.txt" gespeichert und zeigt das Ergebnis im Fenster an.</p>
+                    <img src="images/4-3.png" style="width: 100%;" alt="">
+                    <p>
+                        Der eigentliche FlyghtSimulator WatchTower wird durch einen reaktiven Ansatz („Reactive Extensions“) angehängt (→ 6.1 Laufzeitansicht „Exemplarische erweiterte zur Simulation“). Auf diese Weise werden alle Flugzeugpositionen synchron geändert. <br>
+                        Unter Windows erfolgt die Integration von FlyghtSimulator in eine Benutzeroberfläche mit einer exe-Datei (* .exe), die mit JFX Framework erstellt wurde. Es startet die Java Virtual Machine (JVM) mit der Klasse mit der Hauptmethode als Parameter (→ 7. 7. Deployment View).
+
+                    </p>
+                    <div style="page-break-after: always;"></div>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-building-block-view"><a class="anchor" href="#section-building-block-view"></a>5. Bausteinsicht</h2>
+                <div class="sectionbody">
+
+                    <div class="sect2">
+                        <h3 id="_ebene1"><a class="anchor" href="#_ebene1"></a>5.1. Ebene 1</h3>
+                        <p>FlightSimulator gliedert sich in drei Subsysteme, wie unten dargestellt. Die gestrichelten Pfeile stellen logische Abhängigkeiten zwischen den Subsystemen dar ("x -> y" für "x hängt von y ab"). Die quadratischen Kästchen auf der Membran des Systems sind Interaktionspunkte („Ports“) mit der Außenwelt (→ 3.2 Bereitstellungskontext). </p>
+                        <img src="images/5-1.png" style="width: 100%;" alt="">
+                        <table class="tableblock frame-all grid-all" style="width:100%; ">
+                            <colgroup>
+                                <col style="width:33%;">
+                                <col style="width:67%;"> 
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="tableblock halign-left valign-top">Subsystem</th>
+                                    <th class="tableblock halign-left valign-top">Kurze Beschreibung</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Simulator</td>
+                                    <td>Realisiert die Kommunikation mit einem Client über JFX und sendet die Logik an die anderen Komponenten</td>
+                                </tr>
+                                <tr>
+                                    <td>AircraftFactory</td>
+                                    <td>Erstellt das spezifische Flyable-Modell (Flugzeugmodell) mit den als Eingabe angegebenen Parametern</td>
+                                </tr>
+                                <tr>
+                                    <td>Tower</td>
+                                    <td>Erstellt das spezifische Turm-Modell (z. B. Wetterturm) mit den als Eingabe angegebenen Parametern</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h3 id="_blackbox"><a class="anchor" href="#_blackbox"></a>5.2 Subsystem Simulator (BlackBox)</h3>
+                        <h4>Absicht / Verantwortung
+                        </h4>
+
+                        <p>Dieses Subsystem implementiert die Kommunikation mit einem Client (z. B. einer grafischen Benutzeroberfläche) unter Verwendung des JFX (→ Entscheidung V.9.1). Es liest Befehle von der Standardeingabe, vergleicht sie mit den Validatoren und leitet sie an die AircraftFactory weiter. Antworten von der AircraftFactory (insbesondere den Modellen) werden vom Subsystem als Ereignisse akzeptiert, gemäß dem Protokoll formatiert und über die Standardausgabe zurückgegeben. Somit steuert das Subsystem die gesamte Simulation.</p>
+
+                        <h4>Schnittstelle</h4>
+                        <p>The subsystem provides its functionality via the Java class <b>javafx.stage.Stage;</b></p>
+                        <img src="images/5-2.png" style="width: 100%;" alt="">
+                        <h4>Dateien</h4>
+                        <p>Die Implementierung befindet sich unter den Paketen org.flightSim</p>
+                        <h4>Offene Punkte </h4>
+                        <p>Die Implementierung des JFX ist unvollständig. Trotzdem reicht es für die Anforderungen von FlightSimulator aus. </p>
+
+                        <h3 id="_subsystem"><a class="anchor" href="#_subsystem"></a> 5.3 Subsystem AircraftFactory(BlackBox)</h3>
+                        <h4>Absicht / Verantwortung</h4>
+                        <p> Dieses Subsystem berücksichtigt die Erstellung der Flugzeugmodelle.</p>
+                        <h4>Schnittstelle</h4>
+                        <img src="images/5-3.png" style="width: 100%;" alt="">
+                        <table class="tableblock frame-all grid-all" style="width:100%; ">
+                            <colgroup>
+                                <col style="width:33%;">
+                                <col style="width:67%;"> 
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="tableblock halign-left valign-top">Methode</th>
+                                    <th class="tableblock halign-left valign-top">Kurze Beschreibung</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>newAircraft</td>
+                                    <td>Sendet die Parameter an den spezifischen Klassenkonstruktor</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h4>Dateien</h4>
+                        <p>Die Implementierung befindet sich unter den Paketen org.flightSim</p>
+                        <h4>Offene Punkte </h4>
+                        <p>Die Implementierung des JFX ist unvollständig. Trotzdem reicht es für die Anforderungen von FlightSimulator aus. </p>
+
+                        <h3 id="_subsystem_bb"><a class="anchor" href="#_subsystem_bb"></a> 5.4 Subsystem Tower (BlackBox) </h3>
+                        <h4>Absicht / Verantwortung</h4>
+                        <p> Dieses Subsystem berücksichtigt die Erstellung der Turmmodelle und benachrichtigt die Flugzeuge über die geänderten Bedingungen.</p>
+                        <h4>Schnittstelle</h4>
+                        <img src="images/5-4.png" style="width: 100%;" alt="">
+                        <table class="tableblock frame-all grid-all" style="width:100%; ">
+                            <colgroup>
+                                <col style="width:33%;">
+                                <col style="width:67%;"> 
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="tableblock halign-left valign-top">Methode</th>
+                                    <th class="tableblock halign-left valign-top">Kurze Beschreibung</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>register</td>
+                                    <td>Registrieren Sie ein Flugzeug zum Turm</td>
+                                </tr>
+                                <tr>
+                                    <td>unregister</td>
+                                    <td>ein Flugzeug vom Turm abmelden</td>
+                                </tr>
+                                <tr>
+                                    <td>conditionsChanged</td>
+                                    <td>Benachrichtigen Sie die Flugzeuge über die geänderten Bedingungen</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h4>Dateien</h4>
+                        <p>Die Implementierung befindet sich unter den Paketen org.flightSim</p>
+                        <h4>Offene Punkte </h4>
+                        <p>Die Implementierung des JFX ist unvollständig. Trotzdem reicht es für die Anforderungen von FlightSimulator aus. </p>
+                        <h3 id="_whitebox"><a class="anchor" href="#_whitebox"></a> 5.5 Kommunikation zwischen dem Turm und Flugzeugtypen (Whitebox) </h3>
+                        <img src="images/5-5.png" style="width: 100%;" alt="">
+                        <table class="tableblock frame-all grid-all" style="width:100%; ">
+                            <colgroup>
+                                <col style="width:33%;">
+                                <col style="width:67%;"> 
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="tableblock halign-left valign-top">Methode</th>
+                                    <th class="tableblock halign-left valign-top">Kurze Beschreibung</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Lookups</td>
+                                    <td>Rufen Sie die Koordinaten jedes Flugzeugs ab und erhalten Sie die Nachricht mit den Informationen über den Flugzeugtyp und das Wetter dort </td>
+                                </tr>
+                                <tr>
+                                    <td>WeatherProvider</td>
+                                    <td>Bietet die Informationen mit der richtigen Wettervorhersage
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h4>Dateien</h4>
+                        <p>Die Implementierung befindet sich unter den Paketen org.flightSim</p>
+                        <h4>Offene Punkte </h4>
+                        <p>Die Implementierung des JFX ist unvollständig. Trotzdem reicht es für die Anforderungen von FlightSimulator aus. </p>
+                    </div>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-runtime-view"><a class="anchor" href="#section-runtime-view"></a>6. Laufzeitsicht</h2>
+                <div class="sectionbody">
+                    <div class="sect2">
+                        <h3 id="__em_bezeichnung_laufzeitszenario_1_em"><a class="anchor" href="#__em_bezeichnung_laufzeitszenario_1_em"></a>6.1. Exemplarische Vorgehensweise zur Simulation</h3>
+                        <img src="images/6-1.png" style="width: 100%;" alt="">
+                    </div>
+                    <center>- In die Simulation eingefügte Scheindaten-</center>
+                    <p>
+                        Der Simulator validiert die Eingabe (→ Konzept 8.4 „Plausibilitätsprüfungen und -validierung“) und erstellt die Flugzeuge. Dann wird jedes Flugzeug dem Wetterturm abonniert. Die Bewegungen werden wetterabhängig durchgeführt. Bei der Landung meldet sich das Flugzeug vom Wetterturm ab. <br>
+                        Das Beispieldiagramm zeigt die Erstellung jedes Flugzeugs und eine Bewegung. Am Ende der Schritte wird das Ergebnis im Fenster gedruckt und in der Ausgabedatei gespeichert.
+                    </p>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-deployment-view"><a class="anchor" href="#section-deployment-view"></a>7. Verteilungssicht</h2>
+                <div class="sectionbody">
+                    <p>In diesem Projekt haben wir ein sehr einfaches Deployment view. Es besteht aus einem einzigen Node, welches das PC/Laptop des Benutzers ist. Es enthält ein Artifact, die Runnable Datei, also den UI Launcher Datei. Jede Betriebsystem, worauf Java installiert wurde, kann das Program ausführen.
+                    </p>
+                    <img src="images/deployment.jpg" width="200" alt="">
+                    <p>
+                        Software Requirements on a PC:
+                    </p>
+                    <ul>
+                        <li>Java Runtime Environment SE 7 (or higher)</li>
+                        <li>The JVM (javaw.exe) is in the PATH</li>
+                        <li>Arena</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-concepts"><a class="anchor" href="#section-concepts"></a>8. Querschnittliche Konzepte</h2>
+                <div class="sectionbody">
+                    <div class="sect2">
+                        <h3 id="__em_konzept_1_em"><a class="anchor" href="#__em_konzept_1_em"></a>8.1. Abhängigkeiten zwischen Modulen</h3>
+                        <div class="paragraph">
+                            <p>
+                                In unserem Projekt kann man 3D Punkte (Koordinaten) generieren. Zwischen diese Punkte und die Klasse Aircraft existiert eine Komposition, weil Aircrafte als Atribute Koordinaten haben.
+                                Mit Hilfe von Aircraft Factory können wir 3 Typen (Balloon, Helicopter, Jetplane)  von Luftfahrzeuge zu generieren. Diese Luftfahrzeuge erweitern die Klasse Aircraft, und implementieren das Interface Flyable, also bekommen sie ein ID, eine Name, Koordinaten und sie können zu ein Weather Tower registrieren.
+                                Man kann Aggregation zwischen der Klasse Tower und Flyable bemerken, es hat als Attribut eine Liste von Typ Flyable und zwei Methoden register, unregister. Weather Tower erweitert die Klasse Tower, überschreibt ihre Methoden und bekommt ein Weather Typ von WeatherProvider Klasse. 
+                            </p>
+                        </div>
+                        <img src="images/lori2.jpg" style="width:100%;" alt="">
+                    </div>
+                    <div class="sect2">
+                        <h3 id="__em_konzept_2_em"><a class="anchor" href="#__em_konzept_2_em"></a>8.2. Domänenmodell</h3>
+                        <div class="paragraph">
+                            <p> Koordinaten - longitude, latitude, height <br>
+                                Aircraft Factory -Helicopter, Jetpane, Balloon <br>
+                                Weather Provider – sun, rain, fog, snow <br><br>
+
+                                Unsere Koordinaten sind Punkte 3D, also sie haben 3 int Attributen welches die longitude, latitude, and height definieren. <br>
+                                Weather Provider hat eine Liste von Strings, es kann 4 Wetter Typen (sun, rain, fog, snow) enthalten. <br>
+                                Aircraft Factory kann 3 Typen von Aircraften generieren: Helicopter, Jetpane, Balloon. <br>
+                                In der Klasse Lookups, kann man verschiedne Koordinaten geben, für jedes Weather-Aircraft Paar.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="sect2">
+                        <h3 id="__em_konzept_n_em"><a class="anchor" href="#__em_konzept_3_em"></a>8.3. Benutzungsoberfläche</h3>
+                        <div class="paragraph">
+                            <p>Wir haben unser Projekt mit einem JavaFX User Interface verbindet. Mit der Verwendung von JavaFx, haben wir die zurücklieferte Ergebnisse angezeigt. Verschiedene Benutzern können jetzt die Applikation leicht verwenden. JavaFX wurde, wie schon oben genannt, nur für Demo Zwecke benutzt, aber das Program kann auch mit andere UIs verbindet werden. (z.B JSP, Java Servlet und viele Andere)</p>
+                        </div>
+
+                    </div>
+                    <div class="sect2">
+                        <h3 id="__em_konzept_n_em"><a class="anchor" href="#__em_konzept_4_em"></a>8.4. Plausibilisierung und Validierung</h3>
+                        <div class="paragraph">
+                            <p>Die erste und die wichtigste Validierung ist die input Datei(scenario.txt), man muss sicherstellen, dass diese Datei existiert, und das Program es erfolgreich öffnen kann. Davon bekommen wir alle wichtige Informationen um das Program korrekt abzulaufen. Ein sehr wichtiges Element ist die Nummer der Simulationen, dieses muss größer als 0 sein. Dass soll auch das erste Element der Datei sein.</p>
+                        </div>
+                    </div>
+                    <div class="sect2">
+                        <h3 id="__em_konzept_n_em"><a class="anchor" href="#__em_konzept_5_em"></a>8.5. Ausnahme- und Fehlerbehandlung</h3>
+                        <div class="paragraph">
+                            <p>Um die begangenen Fehler zu behandeln, haben wir Exceptions benutzt. Wenn das Program die Input Datei nicht korrekt lesen kann, ein Fehlernachricht (“error:could not read file”) wird auf dem Bildschirm  angezeigt. Falls dass die Nummer der Simulationen, kleiner als Null ist, oder nicht das erste Element von der Input Datei ist, erscheinen zwei andere Nachrichten “Number of simulations must be grater than 0” und “error: first line of input should be number of simulations “. Falls in der Input Datei, ein nicht bekanntes Aircraft ist, dann wird die Nachricht “Invalid aircraft Type angezeigt.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="sect2">
+                        <h3 id="__em_konzept_n_em"><a class="anchor" href="#__em_konzept_6_em"></a>8.6. Testbarkeit</h3>
+                        <div class="paragraph">
+                            <p>Um sicher zu stellen, dass unser Projekt korrekt funktioniert, haben wir Teste geschrieben. Wir verwenden JUnit Testen, das ein Framework fürs Testen von Java Programmen ist. Es ist besonders für automatisierte Unit-Tests geeignet. In dem Projekt, wir haben zwei Teste ausgeführt, eine für das Lesen aus der Input Datei und eine andere für Lesen aus der Output Datei. Beide Teste waren nach der Ausführung erfolgreich.
+                            </p>
+                        </div>
+                    </div>
+
+
+
+                    <div style="page-break-after: always;"></div>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-design-decisions"><a class="anchor" href="#section-design-decisions"></a>9. Entwurfsentscheidungen</h2>
+                <div class="sectionbody">
+                    <h4>ADR-Java FX</h4>
+                    <p>Java FX ist ein Framework zur Erstellung plattformübergreifender Java-Applikationen. Es ist ein Java Specification von Oracle und setzt sich zum Ziel, das professionelle Erstellen von interaktiven Inhalten und grafische Benutzeroberflächen über sämtliche Java-Plattformen hinweg zu erleichtern. <br>
+
+                        Wir haben in unserem Projekt Java FX benutzt, deswegen erreichten wir ein besseres Aussehen, und  jetzt alle Users können die Applikation benutzen. Sie sollen auf der ,,Generate simulation” Taste klicken und das Program wird ausgeführt. Die Ergebnisse der Simulationen finden sie auf dem Bildschirm.
+                    </p>
+                    <h4>ADR-Fabrik methode</h4>
+                    <p>Fabrikmethode bezeichnet ein Entwurfsmuster aus dem Bereich der Softwareentwicklung. Das Muster beschreibt, wie ein Objekt durch Aufruf einer Methode anstatt durch direkten Aufruf eines Konstruktors erzeugt wird. <br>
+                        Fabrikmethoden entkoppeln ihre Aufrufer von Implementierungen konkreter Produkt-Klassen, also wird für die Instanzierung kein new Operator in der aufrufenden Klasse verwendet. 
+                        So kann man zu einem späteren Zeitpunkt Instanzen anderer Klassen erzeugt werden, ohne dass sich die Applikation ändern muss.</p>
+                    <h4>ADR-Textdatei als Datenbank</h4>
+                    <p>Eine Textdatei wurde als Datenbank benutzt. Wir haben diese Entscheidung getroffen, weil es einfach zu implementieren ist und das Set-Up hat weniger gedauert, aber genauso wie beim UI, kann man das System mit andere Varianten verbinden, wie z.B. mit einer MySQL oder SQL Server Datenbank.</p>
+                    <div style="page-break-after: always;"></div>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-quality-scenarios"><a class="anchor" href="#section-quality-scenarios"></a>10. Qualitätsanforderungen</h2>
+                <div class="sectionbody">
+                    <div class="sect2">
+                        <h3 id="_qualit_tsbaum"><a class="anchor" href="#_qualit_tsbaum"></a>10.1. Qualitätsbaum</h3>
+                        <img src="images/9.png" style="width: 100%;" alt="">
+                    </div>
+                    <div class="sect2">
+                        <h3 id="_qualit_tsszenarien"><a class="anchor" href="#_qualit_tsszenarien"></a>10.2. Qualitätsszenarien</h3>
+                        <table class="tableblock frame-all grid-all" style="width:100%; ">
+                            <colgroup>
+                                <col style="width:10%;">
+                                <col style="width:90%;"> 
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="tableblock halign-left valign-top">Nr.</th>
+                                    <th class="tableblock halign-left valign-top">Szenario</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1.</td>
+                                    <td>Ein interessierter Kunde mit Uml-Kenntnissen und Grundkenntnissen über Flugzeuge und Wetter möchte mit dem FlightSim-Programm beginnen. Strategie und Design werden in 10 Minuten enthüllt. </td>
+                                </tr>
+                                <tr>
+                                    <td>2.</td>
+                                    <td>Ein erfahrener Java-Entwickler versucht, ein im Entwurf beschriebenes Modul zu implementieren. Er findet den Quellcode sehr leicht.</td>
+                                </tr>
+                                <tr>
+                                    <td>3.</td>
+                                    <td>Ein Architekt, der arc42 verwenden möchte, sucht nach einem Beispiel für einen bestimmten Inhalt für ein Kapitel der Vorlage und findet es sofort in der Dokumentation.</td>
+                                </tr>
+                                <tr>
+                                    <td>4.</td>
+                                    <td>Ein Entwickler implementiert eine neue grafische Oberfläche für die Anwendung, wobei die bereits vorhandenen Komponenten sehr einfach in die neue Oberfläche integriert werden können, ohne dass Änderungen am vorhandenen Code vorgenommen werden müssen. Genauso leicht kann man das Program mit einer anderen Datenbank auch verbinden.</td>
+                                </tr>
+                                <tr>
+                                    <td>5.</td>
+                                    <td>Ein Entwickler implementiert einen neuen Flugzeugtyp. Der Aufwand für dieses Update beträgt maximal 30 Minuten.</td>
+                                </tr>
+                                <tr>
+                                    <td>6.</td>
+                                    <td>Während der Simulation wird das Verhalten der Objekte instant verändert und das Ergebnis wird in wenige Sekunden zurückliefert. Wenn die Datenbank mehrere Objekte enthaltet, wird der Zeit der Ausführung steigen, aber nicht exponentiell.</td>
+                                </tr>
+                                <tr>
+                                    <td>7.</td>
+                                    <td>Nach dem Beginn des Programms antwortet die Anwendung auf die Anfrage des Benutzers ziemlich schnell. Das bedeutet, dass die Ergebnisse der Anfrage innerhalb wenigen Sekunden zurückgeliefert werden. Das Ergebnis der Ausführung wird visuell ausgewertet, um verwaltet zu werden.</td>
+                                </tr>
+                                <tr>
+                                    <td>8.</td>
+                                    <td>Der Simulator wird zu Beginn der Simulation mit einem Satz falscher Koordinaten angezeigt. Während der Generierung wird eine Warnung in Bezug auf dieses Flugzeug ausgelöst. Die Anwendung lässt dieses Flugzeug für die aktuelle Simulation weg, ohne in die folgenden Simulationen einzugreifen.</td>
+                                </tr>
+                                <tr>
+                                    <td>9.</td>
+                                    <td>Ein Benutzer möchte FlightSimulator mit einem Front-End verwenden, das ein von der Lösung implementiertes Kommunikationsprotokoll unterstützt. Die Integration erfordert keinen Programmieraufwand, die Konfiguration im Frontend erfolgt in 10 Minuten und wird getestet.</td>
+                                </tr>
+                                <tr>
+                                    <td>10.</td>
+                                    <td>In einer gleichzeitigen Situation ändert sich das Flugzeug unter Berücksichtigung seiner aktuellen Koordinaten und Wetterbedingungen.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="page-break-after: always;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-technical-risks"><a class="anchor" href="#section-technical-risks"></a>11. Risiken und technische Schulden</h2>
+                <div class="sectionbody">
+                    <h4>Risiko: Frontend-Verbindung</h4>
+                    <p>Die Anwendung verfügt über ein Frontend, aber jeder Benutzer kann ein von ihm erstelltes Frontend hinzufügen. <br>
+                        Wenn es nicht möglich ist, eine funktionale Lösung zu implementieren, kann die Anwendung nur mit dem anfänglichen Frontend verwendet werden. <br><br>
+                        <b>Notfallplanung </b><br>
+                        Die anfängliche Benutzeroberfläche wird verwendet, um mit dem Flugsimulationsprogramm zu interagieren, bis die Probleme mit dem Frontend des Kunden gelöst sind. <br><br>
+                        <b>Risikominderung</b> <br> 
+                        Vor der Verwendung des Programms sollte seine Schnittstelle getestet werden, um die Funktionalität der Anwendung sicherzustellen.
+                    </p>
+                    <h4>Risiko: Ungültige Daten in der Eingabedatei</h4>
+                    <p>Die Anwendung verfügt über eine Eingabedatei, in die die Anzahl der Simulationen eingegeben wird, und in den folgenden Zeilen das Flugzeug zusammen mit seinen Koordinaten. Wenn diese Datei falsche Koordinaten enthält, werden diese Flugzeuge nicht erzeugt und ihre Verhalten nicht simuliert. Wenn die Anzahl der Simulationen jedoch nicht gültig ist, funktioniert die Anwendung nicht. <br><br>
+                        <b>Notfallplanung</b> <br>
+                        Wenn keine gültige Eingabedatei vorhanden ist, muss sie bearbeitet werden, um sie gültig zu machen. Eine andere Möglichkeit besteht darin, die Eingabedatei zu löschen und eine Datei mit demselben Namen, aber gültigen Daten zu erstellen. <br><br>
+                        <b>Risikominderung </b><br>
+                        Bevor Sie die Anwendung verwenden, wird empfohlen, die Eingabedatei zu überprüfen. Das System wurde auf dem Prinzip der Effienz gebaut und das Program sollte auch auf alte Geräte auch funktionieren.
+                    </p>
+                    <div style="page-break-after: always;"></div>
+                </div>
+            </div>
+            <div class="sect1">
+                <h2 id="section-glossary"><a class="anchor" href="#section-glossary"></a>12. Glossar</h2>
+                <img src="images/" style="width: 100%;" alt="">
+                <div class="sectionbody">
+                    <table class="tableblock frame-all grid-all" style="width:100%; ">
+                        <colgroup>
+                            <col style="width:33%;">
+                            <col style="width:66%;"> 
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="tableblock halign-left valign-top">Begriff</th>
+                                <th class="tableblock halign-left valign-top">Definition</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Benutzer, Nutzer, Kunde</td>
+                                <td>Diejenige die die Anwendung verwenden und die Simulation über die grafische Oberfläche durchführen.</td>
+                            </tr>
+                            <tr>
+                                <td>UI</td>
+                                <td>User Inteface. In unserem Fall Java FX.</td>
+                            </tr>
+                            <tr>
+                                <td>DB</td>
+                                <td>Datenbank. In unserem Fall scenario.txt</td>
+                            </tr>
+                            <tr>
+                                <td class="tableblock halign-left valign-top"><p class="tableblock">Balloon, Helicopter, Jetplane</p></td>
+                                <td class="tableblock halign-left valign-top"><p class="tableblock">Flugzeugtype</p></td>
+                            </tr>
+                            <tr>
+                                <td>Turm</td>
+                                <td>Der Turm registriert die vorhandenen Flugzeugtypen und registriert dessen Verhalten.</td>
+                            </tr>
+                            <tr>
+                                <td class="tableblock halign-left valign-top"><p class="tableblock">SUN, RAIN, FOG, SNOW </p></td>
+                                <td class="tableblock halign-left valign-top"><p class="tableblock">Die verfügbare Wetterbendingungen für die Simulation</p></td>
+                            </tr>
+                            <tr>
+                                <td class="tableblock halign-left valign-top"><p class="tableblock">Landing</p></td>
+                                <td class="tableblock halign-left valign-top"><p class="tableblock">Das Flugzeug ist erfolgreich gelandet.
+                                    </p></td>
+                            </tr>
+                            <tr>
+                                <td class="tableblock halign-left valign-top"><p class="tableblock">Koordinaten</p></td>
+                                <td class="tableblock halign-left valign-top"><p class="tableblock">Koordinaten sind positive Zahlen. Die Höhe liegt im Bereich von 0-100. Wenn ein Flugzeug die obere Grenzhöhe überschreiten muss, bleibt es bei 100.
+                                    </p></td>
+                            </tr>
+                            <tr>
+                                <td>Simulation</td>
+                                <td>Die Veränderung des Verhaltens anhand der Wetterbedingungen.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div id="footer-text">
+                Dokumentation v 1.0
+            </div>
+        </div>
+    </body>
+</html>
